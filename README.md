@@ -7,18 +7,18 @@ This repository is my personal knowledge base while learning and practicing **Of
 
 ## 📂 Main Categories
 
-- 🌐 [Network Hacking](network-hacking)  
-- 🕸️ [Web Hacking](web-hacking)  
-- 🪟 [Windows Hacking](windows-hacking)  
-- 🐧 [Linux Hacking](linux-hacking)  
-- ☁️ [Cloud Hacking](cloud-hacking)  
-- 📱 [Mobile Hacking](mobile-hacking)  
-- 🔐 [Cryptography & Cracking](cryptography-cracking)  
-- 🎯 [Social Engineering](social-engineering)  
-- ⚙️ [Exploit Development](exploit-development)  
-- 🧰 [Scripts](scripts)  
-- 🔧 [Tools](tools)  
-- 📚 [Resources](resources)  
+- 🌐 [Network Hacking](./network-hacking/README.md)  
+- 🕸️ [Web Hacking](./web-hacking/README.md)  
+- 🪟 [Windows Hacking](./windows-hacking/README.md)  
+- 🐧 [Linux Hacking](./linux-hacking/README.md)  
+- ☁️ [Cloud Hacking](./cloud-hacking/README.md)  
+- 📱 [Mobile Hacking](./mobile-hacking/README.md)  
+- 🔐 [Cryptography & Cracking](./cryptography-cracking/README.md)  
+- 🎯 [Social Engineering](./social-engineering/README.md)  
+- ⚙️ [Exploit Development](./exploit-development/README.md)  
+- 🧰 [Scripts](./scripts/README.md)  
+- 🔧 [Tools](./tools/README.md)  
+- 📚 [Resources](./resources/README.md)  
 
 ---
 
